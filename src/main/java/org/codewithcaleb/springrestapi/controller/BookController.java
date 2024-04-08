@@ -5,10 +5,10 @@ import org.codewithcaleb.springrestapi.domain.Book;
 import org.codewithcaleb.springrestapi.services.BookService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,4 +26,32 @@ public class BookController {
         return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
 
     }
+
+    @GetMapping(path = "/books/{isbn}")
+    public ResponseEntity<Book> retrieveBook(@PathVariable final String isbn){
+        Optional<Book> foundBook = bookService.findById(isbn);
+
+        //the map methods predicate takes effect if the book exists
+        return foundBook.map(book-> new ResponseEntity<>(book, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
+    }
+
+    @GetMapping(path = "/books")
+    public ResponseEntity<List<Book>> listBooks(){
+        return new ResponseEntity<>(bookService.listBooks(),HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/books/update/{isbn}")
+    public ResponseEntity<Optional<Book>> updateBook(@RequestBody final Book book,
+                                           @PathVariable final String isbn){
+
+        Optional<Book> updatedBook = bookService.updateBook(book, isbn);
+
+        return updatedBook.map(bookItem-> new ResponseEntity<>(updatedBook, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
+    }
+
+
 }
